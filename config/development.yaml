@@ -1,0 +1,9 @@
+db:
+  host: 'localhost'
+  username: 'postgres'
+  password: 'clownkiller'
+  synchronize: true
+  autoLoadEntities: true
+
+jwt:
+  secret: 'topSecret51'
