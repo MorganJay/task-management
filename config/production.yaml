@@ -1,5 +1,5 @@
 server:
-  origin: https://morganjay.github.io/task-management-frontend/
+  origin: https://morganjay.github.io/*
 
 db:
   synchronize: false
