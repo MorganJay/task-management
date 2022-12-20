@@ -18,10 +18,7 @@ async function bootstrap() {
     app.enableCors();
   } else {
     app.enableCors({
-      origin: [
-        serverConfig.origin,
-        'https://morganjay.github.io/task-management-frontend/',
-      ],
+      origin: serverConfig.origin,
     });
     logger.log(`Accepting requests from origin '${serverConfig.origin}'`);
   }
