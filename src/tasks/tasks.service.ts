@@ -35,8 +35,8 @@ export class TasksService {
 
     if (search) {
       query.andWhere(
-        '(task.title LIKE :search OR task.description LIKE :search)',
-        { search: `%${search}%` },
+        '(LOWER(task.title) LIKE :search OR LOWER(task.description) LIKE :search)',
+        { search: `%${search.toLowerCase()}%` },
       );
     }
 
@@ -54,22 +54,24 @@ export class TasksService {
     }
   }
 
-  async getTaskById(id: number, user: User): Promise<Task> {
+  async getTaskById(id: string, user: User): Promise<Task> {
     const found = await this.taskRepository.findOneBy({ id, userId: user.id });
+
     if (!found) throw new NotFoundException(`Task with ID '${id}' not found`);
 
     return found;
   }
 
   async createTask(createTaskDto: CreateTaskDto, user: User): Promise<Task> {
-    const task = new Task();
-    task.title = createTaskDto.title;
-    task.description = createTaskDto.description;
-    task.status = TaskStatus.OPEN;
-    task.user = user;
+    const task = this.taskRepository.create({
+      title: createTaskDto.title,
+      description: createTaskDto.description,
+      status: TaskStatus.OPEN,
+      user,
+    });
 
     try {
-      await task.save();
+      await this.taskRepository.save(task);
     } catch (error) {
       this.logger.error(
         `Failed to create task for User ${user.username} Data ${JSON.stringify(
@@ -85,17 +87,18 @@ export class TasksService {
   }
 
   async updateTaskStatus(
-    id: number,
+    id: string,
     status: TaskStatus,
     user: User,
   ): Promise<Task> {
     const task = await this.getTaskById(id, user);
     task.status = status;
-    await task.save();
+
+    await this.taskRepository.save(task);
     return task;
   }
 
-  async deleteTask(id: number, user: User): Promise<void> {
+  async deleteTask(id: string, user: User): Promise<void> {
     const result = await this.taskRepository.delete({ id, userId: user.id });
 
     if (result.affected === 0)

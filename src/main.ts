@@ -1,13 +1,17 @@
 import { NestFactory } from '@nestjs/core';
-import { Logger } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 
 import { AppModule } from './app.module';
+import { TransformInterceptor } from './transform.interceptor';
 
 import * as config from 'config';
 
 async function bootstrap() {
   const logger = new Logger('bootstrap');
   const app = await NestFactory.create(AppModule);
+  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalInterceptors(new TransformInterceptor());
+
   const serverConfig: any = config.get('server');
 
   if (process.env.NODE_ENV === 'development') {
@@ -21,6 +25,6 @@ async function bootstrap() {
   await app.listen(port);
 
   logger.log(`Application listening on port ${port}`);
-  logger.verbose(process.env.NODE_ENV);
+  logger.verbose('environment=' + process.env.NODE_ENV);
 }
 bootstrap();

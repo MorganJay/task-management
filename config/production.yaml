@@ -3,4 +3,3 @@ server:
 
 db:
   synchronize: false
-  autoLoadEntities: true

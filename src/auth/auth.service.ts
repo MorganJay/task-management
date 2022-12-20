@@ -31,7 +31,7 @@ export class AuthService {
     user.password = await this.hashPassword(password, user.salt);
 
     try {
-      await user.save();
+      await this.userRepository.save(user);
     } catch (error) {
       if (error.code === '23505')
         throw new ConflictException('Username already exists');
@@ -50,12 +50,12 @@ export class AuthService {
     const { username, password } = authCredentialsDto;
     const user = await this.userRepository.findOneBy({ username });
 
-    if (!(user && (await user.validatePassword(password)))) {
+    if (!(user && (await bcrypt.compare(password, user.password)))) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
     const payload: JwtPayload = { username };
-    const accessToken = this.jwtService.sign(payload);
+    const accessToken: string = this.jwtService.sign(payload);
     this.logger.debug(
       `Generated JWT token with payload ${JSON.stringify(payload)}`,
     );

@@ -5,13 +5,10 @@ import {
   Get,
   Logger,
   Param,
-  ParseIntPipe,
   Patch,
   Post,
   Query,
   UseGuards,
-  UsePipes,
-  ValidationPipe,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 
@@ -28,14 +25,11 @@ import { GetUser } from '../auth/get-user.decorator';
 @Controller('tasks')
 @UseGuards(AuthGuard())
 export class TasksController {
-  private logger = new Logger('TasksController');
+  private logger = new Logger('TasksController', { timestamp: true });
   constructor(private taskService: TasksService) {}
 
   @Get()
-  getTasks(
-    @Query(ValidationPipe) filterDto: GetTasksFilterDto,
-    @GetUser() user: User,
-  ) {
+  getTasks(@Query() filterDto: GetTasksFilterDto, @GetUser() user: User) {
     this.logger.verbose(
       `User ${user.username} retrieved all tasks. Filters ${JSON.stringify(
         filterDto,
@@ -45,15 +39,11 @@ export class TasksController {
   }
 
   @Get('/:id')
-  getTaskById(
-    @Param('id', ParseIntPipe) id: number,
-    @GetUser() user: User,
-  ): Promise<Task> {
+  getTaskById(@Param('id') id: string, @GetUser() user: User): Promise<Task> {
     return this.taskService.getTaskById(id, user);
   }
 
   @Post()
-  @UsePipes(ValidationPipe)
   createTask(
     @Body() createTaskDto: CreateTaskDto,
     @GetUser() user: User,
@@ -68,7 +58,7 @@ export class TasksController {
 
   @Patch('/:id/status')
   updateTaskStatus(
-    @Param('id', ParseIntPipe) id: number,
+    @Param('id') id: string,
     @Body('status', TaskStatusValidationPipe) status: TaskStatus,
     @GetUser() user: User,
   ): Promise<Task> {
@@ -76,10 +66,7 @@ export class TasksController {
   }
 
   @Delete('/:id')
-  deleteTask(
-    @Param('id', ParseIntPipe) id: number,
-    @GetUser() user: User,
-  ): Promise<void> {
+  deleteTask(@Param('id') id: string, @GetUser() user: User): Promise<void> {
     return this.taskService.deleteTask(id, user);
   }
 }
